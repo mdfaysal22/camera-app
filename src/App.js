@@ -10,7 +10,7 @@ function App() {
   const photoRef = useRef(null);
 
   const [hasPhoto, setHasPhoto] = useState(false)
-  console.log(photoRef)
+  console.log(hasPhoto, photoRef)
 
   const getVideo = () => {
     navigator.mediaDevices
@@ -87,7 +87,9 @@ function App() {
         <div className="col text-center fs-1">
           <Button onClick={handleTakePhoto} variant="outline-dark"><FiCamera></FiCamera></Button>
         </div>
-        <div className="col"></div>
+        <div className="col">
+          {/* <Button ref={photoRef} download>download</Button> */}
+        </div>
         </Container>
       </div>
     </div>
