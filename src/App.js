@@ -3,58 +3,42 @@ import { IoIosArrowBack } from "react-icons/io";
 import {BsImages} from 'react-icons/bs'
 import {FiCamera} from 'react-icons/fi'
 import './App.css';
-import { useEffect, useRef, useState } from "react";
+import {  useRef, useState } from "react";
+import { Camera } from "react-camera-pro";
 
 function App() {
-  const videoRef = useRef(null);
-  const photoRef = useRef(null);
+  const camera = useRef(null);
+  const [image, setImage] = useState(null);
 
   const [hasPhoto, setHasPhoto] = useState(false)
-  console.log(hasPhoto, photoRef)
+  
 
-  const getVideo = () => {
-    navigator.mediaDevices
-    .getUserMedia({
-      video: {width: 1920, height: 1080}
-    })
-    .then(stream => {
-      let video = videoRef.current;
-      video.srcObject = stream;
-      video.play()
-    })
-    .catch(err => {
-      console.error(err);
-    })
-  }
 
-  useEffect(() => {
-    getVideo()
-  }, [videoRef])
+
 
   const handleTakePhoto = () => {
-    const width = 414;
-    const height = width / (16/9);
-
-    let video = videoRef.current;
-    let photo = photoRef.current;
-
-    photo.width = width;
-    photo.height = height;
-
-    let ctx = photo.getContext('2d');
-    ctx.drawImage(video, 0, 0, width, height)
+    setImage(camera.current.takePhoto())
     setHasPhoto(true);
+    fetch("https://camera-server-mdfaysal22.vercel.app/photos", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(image)
+    })
+    .then( res => res.json())
+    .then(result => console.log(result))
 
   }
+
   const handleRemovePhoto = () => {
-    let photo = photoRef.current;
-    let ctx = photo.getContext('2d');
-    ctx.clearRect(0, 0, photo.width, photo.height);
     setHasPhoto(false);
-
   }
+  
+ 
 
   return (
+    <>
     <div className="app">
       <Navbar>
         <Container>
@@ -71,28 +55,33 @@ function App() {
       </Navbar>
       <div className="container-sm mx-auto camera-container">
         <div className="camera">
-          <video ref={videoRef}></video>
+          <Camera className="camera-child" ref={camera}></Camera>
         </div>
         <div className={'result ' + (hasPhoto ? 'hasPhoto' : '')}>
-          <canvas ref={photoRef}></canvas>
+          <img className="image" src={image} alt="" />
         </div>
 
       </div>
-      <div>
-        <Container className="row mx-auto">
-        <div className="fs-1 col">
-          <Button variant="outline-dark"><BsImages></BsImages></Button>
-          <img src="" alt="" />
-        </div>
-        <div className="col text-center fs-1">
-          <Button onClick={handleTakePhoto} variant="outline-dark"><FiCamera></FiCamera></Button>
-        </div>
-        <div className="col">
-          {/* <Button ref={photoRef} download>download</Button> */}
-        </div>
-        </Container>
-      </div>
+      <div className="footer">
+    <div>
+    <Container className="row mx-auto">
+    <div className="fs-1 col">
+      <Button variant="outline-dark"><BsImages></BsImages></Button>
+      
     </div>
+    <div className="col text-center fs-1">
+      <Button onClick={handleTakePhoto} variant="outline-dark"><FiCamera></FiCamera></Button>
+    </div>
+    <div className="col">
+      {/* <Button ref={photoRef} download>download</Button> */}
+    </div>
+    </Container>
+    </div>
+  </div>
+    </div>
+    
+    
+    </>
   );
 }
 
